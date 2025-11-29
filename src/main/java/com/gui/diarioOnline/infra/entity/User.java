@@ -1,0 +1,88 @@
+package com.gui.diarioOnline.infra.entity;
+
+import com.gui.diarioOnline.controller.dto.UserResponse;
+import com.gui.diarioOnline.infra.model.Media;
+import com.gui.diarioOnline.infra.model.Role;
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Document(collection = "user")
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+
+public class User implements UserDetails {
+
+    @Id
+    private String id;
+
+    private String name;
+
+    private String password;
+
+    @Indexed(unique = true)
+    private String email;
+
+    private List<Media> media;
+
+    private List<Role> roles;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    public UserResponse toResponse(){
+        return new UserResponse(
+                this.name,
+                this.email,
+                this.media,
+                this.roles
+        );
+    }
+}
+
+
