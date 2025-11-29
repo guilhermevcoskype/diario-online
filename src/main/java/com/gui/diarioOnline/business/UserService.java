@@ -5,10 +5,11 @@ import com.gui.diarioOnline.controller.dto.UserResponse;
 import com.gui.diarioOnline.infra.entity.User;
 import com.gui.diarioOnline.infra.exception.EmailAlreadyUsedException;
 import com.gui.diarioOnline.infra.repository.UserRepository;
-import com.mongodb.DuplicateKeyException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,10 +20,10 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private UserRepository repository;
+    private UserRepository userRepository;
 
     public List<UserResponse> getUsers(){
-        return repository.findAll().stream().map(user -> new UserResponse(
+        return userRepository.findAll().stream().map(user -> new UserResponse(
                         user.getName(),
                         user.getEmail(),
                         user.getMedia(),
@@ -31,17 +32,19 @@ public class UserService {
                 .toList();
     }
 
+    @Transactional
     public void deleteUser(String email){
-        repository.deleteByEmail(email);
+        userRepository.deleteByEmail(email);
     }
 
+    @Transactional
     public UserResponse createUser(UserRequest userRequest){
         User user = userRequest.toModel();
         user.setPassword(passwordEncoder.encode(userRequest.password()));
         try {
-            return repository.save(user).toResponse();
+            return userRepository.save(user).toResponse();
         } catch (DuplicateKeyException e) {
-            throw new EmailAlreadyUsedException();
+            throw new EmailAlreadyUsedException("O e-mail fornecido já está em uso.");
         }
     }
 }
