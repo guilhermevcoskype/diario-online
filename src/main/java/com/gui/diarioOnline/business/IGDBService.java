@@ -1,9 +1,10 @@
 package com.gui.diarioOnline.business;
 
-import com.gui.diarioOnline.controller.dto.*;
+import com.gui.diarioOnline.controller.dto.CoverResponse;
+import com.gui.diarioOnline.controller.dto.DetailedGameResponse;
+import com.gui.diarioOnline.controller.dto.GameResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -24,10 +25,8 @@ public class IGDBService {
                 .bodyValue(queryGameList)
                 .retrieve()
                 .bodyToFlux(GameResponse.class)
-                // Operador chave: Para cada 'game' no Flux, faça outra chamada (flatMap)
                 .flatMap(gameResponse -> {
 
-                    // Se o jogo não tiver capa, retorne um DTO incompleto imediatamente (opcional)
                     if (gameResponse.cover() == null) {
                         return Mono.just(new DetailedGameResponse(
                                 gameResponse.id(),
@@ -38,18 +37,15 @@ public class IGDBService {
                         ));
                     }
 
-                    // 1. Chame o método que retorna o Mono<Cover>
                     Mono<CoverResponse> coverMono = consumeCoverGame(gameResponse);
 
-                    // 2. Use 'zipWith' para combinar o gameResponse original e o coverMono
                     return coverMono.map(cover ->
-                            // 3. Mapeie para o novo DTO DetailedGameResponse
                             new DetailedGameResponse(
                                     gameResponse.id(),
                                     gameResponse.name(),
                                     gameResponse.summary(),
                                     gameResponse.cover(),
-                                    cover.url() // Assumindo que Cover tem um método url()
+                                    cover.url()
                             )
                     );
                 }).collectList().block();
@@ -58,10 +54,10 @@ public class IGDBService {
     public Mono<CoverResponse> consumeCoverGame(GameResponse game) {
         String queryCoverUrl = "fields url; where id = "+game.cover()+";";
         return webClient.post()
-                .uri("/covers") // The endpoint returning a Mono
+                .uri("/covers")
                 .bodyValue(queryCoverUrl)
                 .retrieve()
-                .bodyToFlux(CoverResponse.class).next(); // Specify the type of the single element
+                .bodyToFlux(CoverResponse.class).next();
     }
 
 }

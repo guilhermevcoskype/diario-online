@@ -1,14 +1,17 @@
 package com.gui.diarioOnline.infra.model;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 
 public class Game extends Media {
+
 
     private Long id;
 

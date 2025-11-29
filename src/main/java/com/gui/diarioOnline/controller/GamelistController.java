@@ -1,16 +1,16 @@
 package com.gui.diarioOnline.controller;
 
+import com.gui.diarioOnline.business.GameService;
 import com.gui.diarioOnline.business.IGDBService;
 import com.gui.diarioOnline.business.UserService;
 import com.gui.diarioOnline.controller.dto.DetailedGameResponse;
+import com.gui.diarioOnline.controller.dto.SaveGameRequest;
 import com.gui.diarioOnline.infra.model.Game;
 import com.gui.diarioOnline.infra.model.Media;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +23,14 @@ public class GamelistController {
     private IGDBService igbdService;
 
     @Autowired
+    private GameService gameService;
+
+    @Autowired
     private UserService userService;
 
     @PostMapping("/games")
-    public ResponseEntity<List<Media>> gamesList(@RequestBody String gameResponse) {
-        List<DetailedGameResponse> list = igbdService.consumeGamesList(gameResponse);
+    public ResponseEntity<List<Media>> gamesList(@RequestBody String gameName) {
+        List<DetailedGameResponse> list = igbdService.consumeGamesList(gameName);
         List<Media> listMedia = new ArrayList<>();
         list.forEach(dataildGame -> {
             Game game = new Game();
@@ -39,5 +42,12 @@ public class GamelistController {
         });
 
         return ResponseEntity.ok(listMedia);
+    }
+
+    @PostMapping("/savegame")
+    @ResponseStatus(HttpStatus.OK)
+
+    public void savegame(@RequestBody SaveGameRequest saveGameRequest) {
+        gameService.saveGameUser(saveGameRequest);
     }
 }
