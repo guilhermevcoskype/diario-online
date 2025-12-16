@@ -32,7 +32,7 @@ public class ReviewService {
     @Autowired
     private ReviewRepository reviewRepository;
 
-    public Review getReviewFromUserAndMedia(String email, String mediaId) {
+    public Review getReviewFromUserAndMediaId(String email, String mediaId) {
         String userId = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new)
                 .getId();
@@ -40,6 +40,22 @@ public class ReviewService {
         Optional<Review> optionalReview = reviewRepository.findByUserIdAndMediaId(userId, mediaId);
 
         return optionalReview.orElseThrow(ReviewNotFoundException::new);
+
+    }
+
+    public Review getReviewFromUserAndMediaBusinessId(String email, String mediaBusinessId) {
+        String userId = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new)
+                .getId();
+        Optional<Game> gameOptional = mediaRepository.findByBusinessId(mediaBusinessId);
+
+        if(gameOptional.isPresent()){
+            Game game = gameOptional.get();
+            Optional<Review> optionalReview = reviewRepository.findByUserIdAndMediaId(userId, game.getId());
+            return optionalReview.orElse(null);
+        }
+
+        return null;
 
     }
 
@@ -58,7 +74,10 @@ public class ReviewService {
         Optional<Review> reviewListOptional = reviewRepository.findByUserIdAndMediaId(user.getId(), media.getId());
 
         if (reviewListOptional.isPresent()) {
-            throw new ReviewAlreadyExistsException();
+            Review review = reviewListOptional.get();
+            review.setRating(ratings);
+            review.setComments(comments);
+            return reviewRepository.save(review);
         }
 
         return reviewRepository.save(Review.builder().user(user).media(media).comments(comments).rating(ratings).build());
@@ -92,7 +111,7 @@ public class ReviewService {
         User user = userRepository.findByEmail(saveMediaRequestDTO.email()).orElseThrow(UserNotFoundException::new);
         Optional<Game> gameOptional = mediaRepository.findByBusinessId(saveMediaRequestDTO.mediaRequestDTO().gameId());
         Game game;
-        game = gameOptional.orElseGet(() -> mediaRepository.save(((Game)createMediaFromDTO(saveMediaRequestDTO.mediaRequestDTO()))));
+        game = gameOptional.orElseGet(() -> mediaRepository.save(((Game) createMediaFromDTO(saveMediaRequestDTO.mediaRequestDTO()))));
         return this.saveReview(game, user, saveMediaRequestDTO.comments(), saveMediaRequestDTO.rating());
 
     }
@@ -101,7 +120,7 @@ public class ReviewService {
     public void deleteGameFromUser(DeleteMediaRequestDTO deleteMediaRequestDTO) {
         User user = userRepository.findByEmail(deleteMediaRequestDTO.email()).orElseThrow(UserNotFoundException::new);
         Media media = mediaRepository.findByBusinessId(deleteMediaRequestDTO.gameId()).orElseThrow(MediaNotFoundException::new);
-        Review review = this.getReviewFromUserAndMedia(user.getEmail(), media.getId());
+        Review review = this.getReviewFromUserAndMediaId(user.getEmail(), media.getId());
         reviewRepository.delete(review);
         this.deleteMediaWithNoPreview(media);
     }
@@ -110,7 +129,7 @@ public class ReviewService {
     public void deleteMediaFromUser(String email, String id) {
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
         Media media = mediaRepository.findById(id).orElseThrow(MediaNotFoundException::new);
-        Review review = this.getReviewFromUserAndMedia(user.getEmail(), media.getId());
+        Review review = this.getReviewFromUserAndMediaId(user.getEmail(), media.getId());
         reviewRepository.delete(review);
         this.deleteMediaWithNoPreview(media);
     }
@@ -129,11 +148,11 @@ public class ReviewService {
 
     private void deleteMediaWithNoPreview(Media media) {
         Optional<List<Review>> reviewsFromMedia = reviewRepository.findByMediaId(media.getId());
-        if (reviewsFromMedia.isPresent()){
-             List<Review> lista = reviewsFromMedia.get();
-             if(lista.isEmpty()){
-                 mediaRepository.deleteById(media.getId());
-             }
+        if (reviewsFromMedia.isPresent()) {
+            List<Review> lista = reviewsFromMedia.get();
+            if (lista.isEmpty()) {
+                mediaRepository.deleteById(media.getId());
+            }
         }
     }
 }

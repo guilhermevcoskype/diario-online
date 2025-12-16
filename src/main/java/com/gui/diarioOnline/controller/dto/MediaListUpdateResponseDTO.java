@@ -2,7 +2,7 @@ package com.gui.diarioOnline.controller.dto;
 
 public record MediaListUpdateResponseDTO(
         String id,
-        String busenessId,
+        String gameId,
         String name,
         String summary,
         String cover,

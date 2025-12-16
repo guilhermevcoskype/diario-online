@@ -38,15 +38,15 @@ public class Mapper {
     }
 
     public MediaListUpdateResponseDTO MediaToResponse (Media media, String email){
-        Review review = reviewService.getReviewFromUserAndMedia(email,((Game)media).getBusinessId());
+        Review review = reviewService.getReviewFromUserAndMediaBusinessId(email,((Game)media).getBusinessId());
         return new MediaListUpdateResponseDTO(
                 media.getId(),
                 ((Game)media).getBusinessId(),
                 media.getName(),
                 media.getSummary(),
                 media.getCover(),
-                review.getRating(),
-                review.getComments()
+                review != null? review.getRating(): null,
+                review != null? review.getComments(): null
         );
     }
     public GameResponseDTO createMediaDTOFromReview(Review review) {
