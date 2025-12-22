@@ -3,9 +3,11 @@
 Esta é a API do projeto Diário Online, responsável por autenticação, persistência de dados dos usuários, gerenciamento de mídias (jogos) e integração com APIs externas.
 
 <div align="center">
+  
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
+
 </div>
 
 ---
@@ -15,10 +17,8 @@ Esta é a API do projeto Diário Online, responsável por autenticação, persis
 O backend do Diário Online fornece uma API REST responsável por autenticação e autorização de usuários, persistência de dados no MongoDB, gerenciamento de usuários e mídias salvas, integração com APIs externas,  de jogos (IGDB) e emissão e validação de tokens JWT. Ele foi desenvolvido seguindo princípios de arquitetura em camadas, boas práticas REST e segurança.
 
 ### 🔗 Repositórios Relacionados
-
-🌐 Frontend (Angular)
-
-🏗️ Infraestrutura (Docker / Compose)
+* 🌐 [Frontend (Angular)](https://github.com/guilhermevcoskype/diario-online-frontend)
+* 🏗️ [Infraestrutura (Docker/Compose)](https://github.com/seu-usuario/diario-online-infra)
 
 ---
 
